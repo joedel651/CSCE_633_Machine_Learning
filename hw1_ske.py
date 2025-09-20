@@ -114,6 +114,7 @@ class LinearRegression:
         self.bias = None
         self.learning_rate = None
         self.max_iter = None
+        
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Train linear regression model.
@@ -124,9 +125,13 @@ class LinearRegression:
         List of loss values
         """
         if self.weights is None:
-                self.weights = np.zeros(X.shape[1]) # make them all 0 to start shape is the columns of X
+                self.weights = np.random.randn(X.shape[1]) * 0.01
+                #self.weights = np.zeros(X.shape[1]) # make them all 0 to start shape is the columns of X
         if self.bias is None:
             self.bias = 0
+
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        rmse_scores = []
 
         # TODO: Implement linear regression training
         #define some hyper parameters
@@ -136,43 +141,62 @@ class LinearRegression:
         #these 2 parameters below were tweaked, I increased the learning rate slowly higher and higher until it diverged to see how far I could go
         #when I could no longer increase it to find improvements I started upping the max iterations
         #NOTE: there are other ways to define when to stop searching for a min like slope or compile time. 
-        self.learning_rate = 0.095
-        self.max_iter = 7000
+        #the best i can get with the traning set is about 71.07 with both gradient descent and closed form soltion
+        self.learning_rate = 0.1
+        self.max_iter = 100000
         loss_values = []
         #get the number of samples
         n=len(y)  
         #normalize X to see if it gives a better loss
-        X = (X - X.mean()) / X.std()
+        self.X_mean = X.mean(axis=0)  # Save the mean
+        self.X_std = X.std(axis=0)    # Save the std
+        X_normalized = (X - self.X_mean) / self.X_std
+        
 
 #The MSE is calculated in this for loop in order to tweak the hyperparameters
 #our notes say MSE is how we most commonly define loss for gradient descent
 #it is assumed the the criterion function is to analyze MSE for either closed form or specific values
 #the fact is was in there was a bit confusing initially.
 
+    
+
         #Perform gradient Descient 
         for i in range(self.max_iter):
             #get the predicted values of the target variable
-            y_pred = self.bias + X @ self.weights
+            #y_pred = self.bias + X @ self.weights
+            y_pred = np.dot(X_normalized, self.weights) + self.bias
             #get the loss function
             #J = (1/n) * np.sum((y - y_pred)**2)
 
             # Compute the loss (Mean Squared Error)
-            loss = (1/n) * np.sum((y - y_pred) ** 2)
+            #loss = (1/n) * np.sum((y - y_pred) ** 2)
+            #l2 regularization
+            #NOTE: both methods of loss return the same thing because i hit the floor for performance
+            lambda_ = 0.0
+            loss = (1/n) * np.sum((y - y_pred) ** 2) + lambda_ * np.sum(model.weights ** 2)
             loss_values.append(loss)
 
             #get the gradients
             #grad_weights = (-2/n)*np.sum(y-y_pred) @ X
             # Compute the gradient for the weights
-            grad_weights = (-2 / n) * X.T @ (y - y_pred)
+            #grad_weights = (-2 / n) * X.T @ (y - y_pred)
+            grad_weights = (-2 / n) * X_normalized.T @ (y - y_pred)
+
             grad_bias = (-2/n)*np.sum(y-y_pred)
 
             #update the weights and bias
             self.weights -= self.learning_rate * grad_weights
             self.bias -= self.learning_rate * grad_bias
+        
+        final_rmse = self.metric(y, np.dot((X - self.X_mean) / self.X_std, self.weights) + self.bias)
+        print("Final RMSE:", final_rmse)
+
 
          
 
         return loss_values
+
+    
         
         
 
@@ -187,10 +211,6 @@ class LinearRegression:
         #This is the Root Mean Squared Error Value:  71.0793559885694
         #The problem with that is we can't tweak hyperparameters to get it under 71 so gradient descent needs to be used
 
-
-        
-        
-        
         Args:
             X: Feature matrix
             y: Target vector
@@ -211,11 +231,12 @@ class LinearRegression:
         #I think this is what we are looking for but I am not 100% sure
         y_pred = X_with_bias @ weights_with_bias
         #residuals is the individual losss at each point
-        residuals = y - y_pred
+        #residuals = y - y_pred
+        loss = self.metric(y, y_pred)
         #we could want the absolute error but idk what gradescope wants that
         #absolute_errors = np.abs(y - y_pred)
         #return the residuals 
-        return residuals.tolist()
+        return [loss]
     
     def predict(self, X: np.ndarray) -> np.ndarray:
         """Make predictions with trained model.
@@ -227,7 +248,10 @@ class LinearRegression:
         Returns:
             Predicted values
         """
-        y_pred = self.bias + X @ self.weights
+        X_normalized = (X - self.X_mean) / self.X_std  
+        y_pred = self.bias + X_normalized @ self.weights  # Use normalized version
+        #the non-normalized version was giving too high of values
+        #y_pred = self.bias + X @ self.weights
 
         return y_pred
 
@@ -266,6 +290,8 @@ class LinearRegression:
         RMSE = np.sqrt(MSE)
         return RMSE
 
+    
+
 class LogisticRegression:
     def __init__(self):
         """Initialize logistic regression model.
@@ -278,6 +304,8 @@ class LogisticRegression:
         self.bias = None
         self.learning_rate = None
         self.max_iter = None
+        self.X_mean = None
+        self.X_std = None
         
     def fit(self, X: np.ndarray, y: np.ndarray) -> list[float]:
         """Train logistic regression model with normalization and L2 regularization.
@@ -290,6 +318,64 @@ class LogisticRegression:
             List of loss values
         """
         # TODO: Implement logistic regression training
+          if self.weights is None:
+                self.weights = np.random.randn(X.shape[1]) * 0.01
+                #self.weights = np.zeros(X.shape[1]) # make them all 0 to start shape is the columns of X
+        if self.bias is None:
+            self.bias = 0
+
+
+        #define some hyper parameters
+        self.learning_rate = 0.01
+        self.max_iter = 1000
+        loss_values = []
+        #get the number of samples
+        n=len(y)  
+        #normalize X to see if it gives a better loss
+        self.X_mean = X.mean(axis=0)  # Save the mean
+        self.X_std = X.std(axis=0)    # Save the std
+        X_normalized = (X - self.X_mean) / self.X_std
+        
+
+    
+
+        #Perform gradient Descient 
+        for i in range(self.max_iter):
+            #get the predicted values of the target variable
+            #y_pred = self.bias + X @ self.weights
+            #y_pred = np.dot(X_normalized, self.weights) + self.bias
+
+            #get the loss function
+            #J = (1/n) * np.sum((y - y_pred)**2)
+            z = np.dot(X_normalized, self.weights) + self.bias
+            z = np.clip(z, -250, 250)  # Prevent overflow
+            #sigmoid is specific to logistic regression 
+            y_pred = 1 / (1 + np.exp(-z))  # Sigmoid activation
+            #l2 regularization to prevent overfitting
+            #NOTE: both methods of loss return the same thing because i hit the floor for performance
+            lambda_ = 0.01
+            #most ML liberies use 1e-15, it doesn thave to be that value but it
+            #prevents log(0)
+            epsilon = 1e-15
+            y_pred = np.clip(y_pred, epsilon, 1 - epsilon)  # Prevent log(0)
+            y_binary = (y > np.median(y)).astype(int)  
+            loss = -(1/n) * np.sum(y_binary * np.log(y_pred) + (1 - y_binary) * np.log(1 - y_pred)) + lambda_ * np.sum(self.weights ** 2)
+            loss_values.append(loss)
+
+            #get the gradients take the l2 regularization into account
+            grad_weights = (1/n) * X_normalized.T @ (y_pred - y_binary) + 2 * lambda_ * self.weights
+            grad_bias = (1/n) * np.sum(y_pred - y_binary)
+
+            #update the weights and bias
+            self.weights -= self.learning_rate * grad_weights
+            self.bias -= self.learning_rate * grad_bias
+        
+
+
+
+         
+
+        return loss_values
     
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
         """Calculate prediction probabilities using normalized features.
@@ -301,6 +387,13 @@ class LogisticRegression:
             Prediction probabilities
         """
         # TODO: Implement logistic regression prediction probabilities
+        X_normalized = (X - self.X_mean) / self.X_std  
+        z = X_normalized @ self.weights + self.bias
+        # basically the same but we need to take sigmoid into account
+        # weights can be too before converging lets clip (just in case)
+        z = np.clip(z, -250, 250)  # Prevent overflow
+        y_pred = 1 / (1 + np.exp(-z))  # Sigmoid activation
+        return y_pred
     
     def predict(self, X: np.ndarray) -> np.ndarray:
         """Make predictions with trained model.
@@ -312,6 +405,15 @@ class LogisticRegression:
             Predicted values
         """
         # TODO: Implement logistic regression prediction
+        #get the probabilities from the function above
+        probabilities = self.predict_proba(X)
+        #I am going to guess and pick a threshold if it is above that 
+        #threshold we will consider it a prediciton
+        predictions = (probabilities >= 0.5).astype(int)
+
+    
+        return predictions
+
 
     def criterion(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate BCE loss.
@@ -324,6 +426,17 @@ class LogisticRegression:
             Loss value
         """
         # TODO: Implement loss function
+        y_binary = (y > np.median(y)).astype(int) 
+
+        #Add epsilon to prevent log(0)
+        epsilon = 1e-15
+        #1-epsilon is the upperbound, epsilon is the lowerbound
+        y_pred = np.clip(y_pred, epsilon, 1 - epsilon)
+
+        #calculate BCE without L2
+        n = len(y_pred)
+        BCE = bce = -(1/n) * np.sum(y_binary * np.log(y_pred) + (1 - y_binary) * np.log(1 - y_pred))
+        return BCE 
     
     def F1_score(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate F1 score with handling of edge cases.
@@ -336,6 +449,7 @@ class LogisticRegression:
             F1 score (between 0 and 1), or 0.0 for edge cases
         """
         # TODO: Implement F1 score calculation
+        #count True Positives False Positives etc 
 
     def label_binarize(self, y: np.ndarray) -> np.ndarray:
         """Binarize labels for binary classification.
@@ -347,6 +461,7 @@ class LogisticRegression:
             Binarized labels
         """
         # TODO: Implement label binarization
+        #threshold comparison 
 
     def get_auroc(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate AUROC score.
@@ -359,6 +474,7 @@ class LogisticRegression:
             AUROC score (between 0 and 1)
         """
         # TODO: Implement AUROC calculation
+        #calculate the area under the curve
 
     def metric(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate AUROC.
@@ -371,6 +487,8 @@ class LogisticRegression:
             AUROC score
         """
         # TODO: Implement AUROC calculation
+        #one liner but need to solve the one above
+        return self.get_auroc(y_true, y_pred)
 
 class ModelEvaluator:
     def __init__(self, n_splits: int = 5, random_state: int = 42):
@@ -402,35 +520,112 @@ if __name__ == "__main__":
     # #I put it in my own directory so that is why it is a dot when creating an instance of the class
     processor = DataProcessor(".")
     train_data, test_data = processor.load_data()
-    # print("Train data shape:", train_data.shape)
-    # print("Test data shape:", test_data.shape)
-    missing_count_training = processor.check_missing_values(train_data)
+    print("Train data shape:", train_data.shape)
+    print("Test data shape:", test_data.shape)
+    missing_count_training_train = processor.check_missing_values(train_data)
+    missing_count_training_test  = processor.check_missing_values(test_data)
     # print("Missing Values:", missing_count_training)
     # print("Missing Count Type:", type(missing_count_training))
     # print(processor.clean_data(train_data))
     clean_data_training = processor.clean_data(train_data)
+    clean_data_test = processor.clean_data(test_data)
     # #print the ones from the training set the test does not have a target variable
     X_train_features, y_train_target_var = processor.extract_features_labels(clean_data_training)
+    X_test_features = clean_data_test  
     # print("X_train features are: ", X_train_features.values)
     # print("y_train target variable is: ", y_train_target_var.values)
     # print("Feature column names:", clean_data_training.columns[:-1].tolist())  # All except last  .tolist() converts pandas list to numpy array
     # print("Target column name:", clean_data_training.columns[-1])  # Last column only
+    #set the model 
     model = LinearRegression()
+    #train the model 
+    #model.fit_closed_form(X_train_features.values, y_train_target_var.values)
+    gradient_descent_problem = model.fit(X_train_features.values, y_train_target_var.values)
     # #the features and target variables were extracted we can dot it with .values to get the numbers of those 
-    res_array = model.fit_closed_form(X_train_features.values, y_train_target_var.values)
-    # print('This is a list of the residuals: ', res_array )
+    #closed = model.fit_closed_form(X_train_features.values, y_train_target_var.values)
+   # print('The closed form RSME Is ', closed )
+    #predict the model 
     y_predict = model.predict(X_train_features.values)
-    MSE = model.criterion(y_train_target_var.values, y_predict)
+    #print(y_predict)
+    #MSE = model.criterion(y_train_target_var.values, y_predict)
     RMSE = model.metric(y_train_target_var.values, y_predict)
     # print('This is the array of y_predict: ', y_predict)
-    # print('This is Mean Squared Error Value: ', MSE )
-    # print('This is the Root Mean Squared Error Value: ', RMSE)
+    #print('This is Mean Squared Error Value: ', MSE )
+    print('This is the Root Mean Squared Error Value: ', RMSE)
     # print("Type of y_predict:", type(y_predict))
-    # print("Type of MSE:", type(MSE))
-    # print("Type of RMSE:", type(RMSE))
-    fit_array = model.fit(X_train_features.values, y_train_target_var.values)
-    print('This is a list of what the fit() does : ', fit_array )
+    #print("Type of MSE:", type(MSE))
+    #print("Type of RMSE:", type(RMSE))
+
+
+    #fit_array = model.fit(X_train_features.values, y_train_target_var.values)
+    #print('This is a list of what the fit() does : ', fit_array )
+    # 1. Feature histograms
+   # 1. Feature histograms
+    # clean_data_training.iloc[:,:-1].hist(bins=30, figsize=(15, 10))
+    # plt.suptitle('Feature Histograms')
+    # plt.tight_layout()
+    # plt.savefig('histograms.png')
+    # #plt.show()
+
+    # # 2. Scatter plot (pick any two features)
+    # plt.figure(figsize=(8, 6))
+    # plt.scatter(clean_data_training['AH'], clean_data_training['RH'], alpha=0.6)
+    # plt.xlabel('Absolute Humidity')
+    # plt.ylabel('Relative Humidity')
+    # plt.title(f"Correlation: {clean_data_training['AH'].corr(clean_data_training['RH']):.3f}")
+    # plt.savefig('scatter.png')
+    # #plt.show()
+
+    # # 3. Correlation heatmap
+    # plt.figure(figsize=(10, 8))
+    # sns.heatmap(clean_data_training.corr(), annot=True, cmap='coolwarm', center=0)
+    # plt.title('Correlation Matrix')
+    # plt.savefig('correlation.png')
+    # #plt.show()
+
+    # # 4. Train model and plot loss
+    # model_plot = LinearRegression()
+    # loss_values = model_plot.fit(X_train_features.values, y_train_target_var.values)
+
+    # plt.figure(figsize=(8, 5))
+    # plt.plot(loss_values)
+    # plt.title('Training Loss')
+    # plt.xlabel('Iteration')
+    # plt.ylabel('MSE')
+    # plt.savefig('loss.png')
+    # plt.show()
+
+    # Find strongest correlations in the entire dataset
+    # ah_rh_corr = clean_data_training['AH'].corr(clean_data_training['RH'])
+    # print(f"Correlation between AH and RH: {ah_rh_corr:.4f}")
+    #corr_matrix = clean_data_training.corr()
+    #corr_matrix.to_csv("correlation_matrix.csv")
+    # print(corr_matrix)
+        # Clean and prepare test data
+
+
+    #get the MSE 
+    mse = model.criterion(y_train_target_var.values, y_predict)
+    print(f"MSE: {mse:.2f}")
+
     
+    
+    # Plot loss
+    plt.figure(figsize=(8, 5))
+    plt.plot(gradient_descent_problem )
+    plt.title('Training Loss')
+    plt.xlabel('Iteration')
+    plt.ylabel('MSE')
+    plt.savefig('loss.png')
+    plt.show()
+
+
+    
+
+
+
+
+
     
 
 
