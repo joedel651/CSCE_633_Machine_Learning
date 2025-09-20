@@ -451,6 +451,33 @@ class LogisticRegression:
         # TODO: Implement F1 score calculation
         #count True Positives False Positives etc 
 
+        #Need to make the input variables binary first
+        y_true_binary = (y_true > np.median(y_true)).astype(int)
+        #We would have to do something different if it was coming from the 
+        #Predict_proba function but think we can assume the input is not those
+        #values
+        y_pred_binary = (y_pred > np.median(y_pred)).astype(int)
+
+        #True Positive
+        TP = np.sum((y_true_binary == 1)& (y_pred_binary == 1))
+        #True Negative
+        TN = np.sum((y_true_binary == 0)& (y_pred_binary == 0))
+        #False Positive
+        FP = np.sum((y_true_binary == 0)& (y_pred_binary == 1))
+        #False Negative 
+        FN = np.sum((y_true_binary == 1)& (y_pred_binary == 0))
+
+        #edge case so we do not divide by zero
+        if TP == 0:
+            return 0.0
+        
+        precision = (TP)/(TP+FP)
+        recall = (TP)/(TP+FN)
+
+        F1 = 2* (precision*recall)/(precision+recall)
+        return F1
+
+
     def label_binarize(self, y: np.ndarray) -> np.ndarray:
         """Binarize labels for binary classification.
         
@@ -462,6 +489,9 @@ class LogisticRegression:
         """
         # TODO: Implement label binarization
         #threshold comparison 
+        threshold = np.median(y)
+        return (y > threshold).astype(int)
+
 
     def get_auroc(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate AUROC score.
@@ -475,6 +505,34 @@ class LogisticRegression:
         """
         # TODO: Implement AUROC calculation
         #calculate the area under the curve
+        #basically this is a way to predict where a point will end up in the confusion matrix
+        y_true_binary = self.label_binarize(y_true)
+
+        #sort in descending order
+        sort_desc = np.argsort(-y_pred)
+        y_pred_sorted = y_pred[sort_desc]
+        y_true_sorted = y_true[sort_desc]
+
+        positive = np.sum(y_true_sorted)  #sum of positive entries 
+        negative = len(y_true_sorted) - P #all the entries not positive
+
+        #make an edge case like the other function
+        if positive == 0 or negative == 0:
+            return 0.0 #in this case the AUROC would not be defined
+
+        # Compute TPR and FPR 
+        TPR = np.cumsum(y_true_sorted) / positive
+        FPR = np.cumsum(1 - y_true_sorted) / negative
+
+        #all this does is make sure that our 0s start at 0 to help get a better graph
+        #(array,index,value)
+        FPR = np.insert(FPR, 0, 0)
+        TPR = np.insert(TPR, 0, 0)
+        #trapz allows us to take the area under a curve
+        auroc = np.trapz(TPR,FPR)
+
+        return auroc
+
 
     def metric(self, y_true: np.ndarray, y_pred: np.ndarray) -> float:
         """Calculate AUROC.
@@ -514,6 +572,9 @@ class ModelEvaluator:
             List of metric scores
         """
         # TODO: Implement cross-validation
+        #there is different methods of cross-validation 
+        #leave one out or K fold would do kf is the most ideal and the library is linked
+
 
 if __name__ == "__main__":
     print("CSCE 633 Homework 1 test of functions")
