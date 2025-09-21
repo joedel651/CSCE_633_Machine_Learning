@@ -533,7 +533,23 @@ class LogisticRegression:
         FPR = np.insert(FPR, 0, 0)
         TPR = np.insert(TPR, 0, 0)
         #trapz allows us to take the area under a curve
-        auroc = np.trapz(TPR,FPR)
+        auroc = np.trapezoid(TPR,FPR)
+
+         # Plot ROC curve
+        plt.figure()
+        plt.plot(FPR, TPR, color='green', lw=2, label=f'AUROC = {auroc:.2f}')
+        plt.plot([0, 1], [0, 1], color='blue', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('ROC Curve')
+        plt.legend(loc="lower right")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(f'roc_curve_{np.random.randint(10000)}.png')  # random name to avoid overwrite
+        plt.close()
+
 
         return auroc
 
@@ -590,13 +606,36 @@ class ModelEvaluator:
             scores.append(score)
 
         return scores
+#it is confusing to both of these in the same function so I added a funciton for logistic 
+# I copied and pasted the one above and tweaked a few things to more easily get AUROC and F1 for each fold
+    def cross_validation_logistic(self, model, X: np.ndarray, y: np.ndarray):
+
+        auroc_scores = []
+        f1_scores = []
+
+        for fold, (train_index, test_index) in enumerate(self.kf.split(X)):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+            model.fit(X_train, y_train)
+            y_pred = model.predict(X_test)
+            y_proba = model.predict_proba(X_test)
+
+            auroc = model.get_auroc(y_test, y_proba)
+            f1 = model.F1_score(y_test, y_pred)
+
+
+            auroc_scores.append(auroc)
+            f1_scores.append(f1)
+
+        return auroc_scores, f1_scores
 
 
 
 
 if __name__ == "__main__":
     print("CSCE 633 Homework 1 test of functions")
-    # #I put it in my own directory so that is why it is a dot when creating an instance of the class
+    # I put it in my own directory so that is why it is a dot when creating an instance of the class
     processor = DataProcessor(".")
     train_data, test_data = processor.load_data()
     # print("Train data shape:", train_data.shape)
@@ -614,19 +653,25 @@ if __name__ == "__main__":
     # print("y_train target variable is: ", y_train_target_var.values)
     # print("Feature column names:", clean_data_training.columns[:-1].tolist())  # All except last  .tolist() converts pandas list to numpy array
     # print("Target column name:", clean_data_training.columns[-1])  # Last column only
-    #linear_model = LinearRegression()
+    # linear_model = LinearRegression()
     logistic_reg = LogisticRegression()
-    #model.fit_closed_form(X_train_features.values, y_train_target_var.values)
-    #linear_model_fit = linear_model.fit(X_train_features.values, y_train_target_var.values)
+    # model.fit_closed_form(X_train_features.values, y_train_target_var.values)
+    # linear_model_fit = linear_model.fit(X_train_features.values, y_train_target_var.values)
     logistic_model_fit = logistic_reg.fit(X_train_features.values, y_train_target_var.values)
-    #initialize the model evaluator
+    # initialize the model evaluator
     evaluator = ModelEvaluator(n_splits=5, random_state=42)
-    #run cross validation 
-    scores = evaluator.cross_validation(logistic_reg, X_train_features.values,  y_train_target_var.values)
+    # run cross validation 
+    auroc_scores, f1_scores = evaluator.cross_validation_logistic(logistic_reg, X_train_features.values, y_train_target_var.values)
+    # print results for AUROC and F1 score
+    print("AUROC scores per fold:", auroc_scores)
+    print("F1 scores per fold:", f1_scores)
+    print(f"Average AUROC: {np.mean(auroc_scores):.3f} ± {np.std(auroc_scores):.3f}")
+    print(f"Average F1 Score: {np.mean(f1_scores):.3f} ± {np.std(f1_scores):.3f}")
+
     # we need the average 
-    print("Cross-validation RMSE scores per fold:", scores) #print all values
-    print("Average RMSE:", np.mean(scores)) 
-    print("Standard deviation RMSE:", np.std(scores)) 
+    # print("Cross-validation RMSE scores per fold:", scores) #print all values
+    # print("Average RMSE:", np.mean(scores)) 
+    # print("Standard deviation RMSE:", np.std(scores)) 
     # #the features and target variables were extracted we can dot it with .values to get the numbers of those 
     #closed = model.fit_closed_form(X_train_features.values, y_train_target_var.values)
     #print('The closed form RSME Is ', closed )
