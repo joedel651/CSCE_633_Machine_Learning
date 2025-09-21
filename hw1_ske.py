@@ -173,7 +173,8 @@ class LinearRegression:
             #l2 regularization
             #NOTE: both methods of loss return the same thing because i hit the floor for performance
             lambda_ = 0.001
-            loss = (1/n) * np.sum((y - y_pred) ** 2) + lambda_ * np.sum(model.weights ** 2)
+            loss = (1/n) * np.sum((y - y_pred) ** 2) + lambda_ * np.sum(self.weights ** 2)
+            #loss = (1/n) * np.sum((y - y_pred) ** 2) + lambda_ * np.sum(model.weights ** 2)
             loss_values.append(loss)
 
             #get the gradients
@@ -578,7 +579,7 @@ class ModelEvaluator:
         #there is different methods of cross-validation 
         #leave one out or K fold would do kf is the most ideal and the library is linked
         scores = []
-        for fold, (train_index, test_index) in enumerate(self.kf.split(x)):
+        for fold, (train_index, test_index) in enumerate(self.kf.split(X)):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
 
@@ -598,8 +599,8 @@ if __name__ == "__main__":
     # #I put it in my own directory so that is why it is a dot when creating an instance of the class
     processor = DataProcessor(".")
     train_data, test_data = processor.load_data()
-    print("Train data shape:", train_data.shape)
-    print("Test data shape:", test_data.shape)
+    # print("Train data shape:", train_data.shape)
+    # print("Test data shape:", test_data.shape)
     missing_count_training_train = processor.check_missing_values(train_data)
     missing_count_training_test  = processor.check_missing_values(test_data)
     # print("Missing Values:", missing_count_training)
@@ -613,9 +614,19 @@ if __name__ == "__main__":
     # print("y_train target variable is: ", y_train_target_var.values)
     # print("Feature column names:", clean_data_training.columns[:-1].tolist())  # All except last  .tolist() converts pandas list to numpy array
     # print("Target column name:", clean_data_training.columns[-1])  # Last column only
-    #model = LinearRegression()
+    #linear_model = LinearRegression()
+    logistic_reg = LogisticRegression()
     #model.fit_closed_form(X_train_features.values, y_train_target_var.values)
-    #gradient_descent_problem = model.fit(X_train_features.values, y_train_target_var.values)
+    #linear_model_fit = linear_model.fit(X_train_features.values, y_train_target_var.values)
+    logistic_model_fit = logistic_reg.fit(X_train_features.values, y_train_target_var.values)
+    #initialize the model evaluator
+    evaluator = ModelEvaluator(n_splits=5, random_state=42)
+    #run cross validation 
+    scores = evaluator.cross_validation(logistic_reg, X_train_features.values,  y_train_target_var.values)
+    # we need the average 
+    print("Cross-validation RMSE scores per fold:", scores) #print all values
+    print("Average RMSE:", np.mean(scores)) 
+    print("Standard deviation RMSE:", np.std(scores)) 
     # #the features and target variables were extracted we can dot it with .values to get the numbers of those 
     #closed = model.fit_closed_form(X_train_features.values, y_train_target_var.values)
     #print('The closed form RSME Is ', closed )
@@ -695,46 +706,49 @@ if __name__ == "__main__":
     # plt.show()
 
     # Now add the binary classification part:
-    print("=== Binary Label Creation ===")
-    print(f"Original PT08.S1(CO) range: {y_train_target_var.min():.2f} to {y_train_target_var.max():.2f}")
+    # print("=== Binary Label Creation ===")
+    # print(f"Original PT08.S1(CO) range: {y_train_target_var.min():.2f} to {y_train_target_var.max():.2f}")
 
-    # Create and train logistic regression model
-    logistic_model = LogisticRegression()
+    # # Create and train logistic regression model
+    # logistic_model = LogisticRegression()
 
-    # Create binary labels using the 1000 threshold
-    y_binary = logistic_model.label_binarize(y_train_target_var.values)
-    print(f"Binary labels distribution:")
-    print(f"  Label 0 (≤ 1000): {np.sum(y_binary == 0)} samples ({np.mean(y_binary == 0)*100:.1f}%)")
-    print(f"  Label 1 (> 1000): {np.sum(y_binary == 1)} samples ({np.mean(y_binary == 1)*100:.1f}%)")
+    # # Create binary labels using the 1000 threshold
+    # y_binary = logistic_model.label_binarize(y_train_target_var.values)
+    # print(f"Binary labels distribution:")
+    # print(f"  Label 0 (≤ 1000): {np.sum(y_binary == 0)} samples ({np.mean(y_binary == 0)*100:.1f}%)")
+    # print(f"  Label 1 (> 1000): {np.sum(y_binary == 1)} samples ({np.mean(y_binary == 1)*100:.1f}%)")
 
-    # Train the logistic regression model
-    print("\n=== Training Logistic Regression ===")
-    loss_values = logistic_model.fit(X_train_features.values, y_train_target_var.values)
-    #get the BCE
-    print(f"Final BCE Loss: {loss_values[-1]:.4f}")
+    # # Train the logistic regression model
+    # print("\n=== Training Logistic Regression ===")
+    # loss_values = logistic_model.fit(X_train_features.values, y_train_target_var.values)
+    # #get the BCE
+    # print(f"Final BCE Loss: {loss_values[-1]:.4f}")
 
-    # Plot the loss 
-    plt.figure(figsize=(10, 6))
-    plt.plot(loss_values)
-    plt.title('Logistic Regression Training Loss (Binary Cross Entropy)')
-    plt.xlabel('Iteration')
-    plt.ylabel('BCE Loss')
-    plt.grid(True)
-    plt.savefig('logistic_loss.png', dpi=300, bbox_inches='tight')
-    plt.show()
+    # # Plot the loss 
+    # plt.figure(figsize=(10, 6))
+    # plt.plot(loss_values)
+    # plt.title('Logistic Regression Training Loss (Binary Cross Entropy)')
+    # plt.xlabel('Iteration')
+    # plt.ylabel('BCE Loss')
+    # plt.grid(True)
+    # plt.savefig('logistic_loss.png', dpi=300, bbox_inches='tight')
+    # plt.show()
 
-        # Make predictions on training data for evaluation
-    print("\n=== Model Evaluation ===")
-    y_train_proba = logistic_model.predict_proba(X_train_features.values)
-    y_train_pred = logistic_model.predict(X_train_features.values)
+    #     # Make predictions on training data for evaluation
+    # print("\n=== Model Evaluation ===")
+    # y_train_proba = logistic_model.predict_proba(X_train_features.values)
+    # y_train_pred = logistic_model.predict(X_train_features.values)
 
-    # Calculate metrics on training data
-    f1_train = logistic_model.F1_score(y_train_target_var.values, y_train_proba)
-    auroc_train = logistic_model.get_auroc(y_train_target_var.values, y_train_proba)
+    # # Calculate metrics on training data
+    # f1_train = logistic_model.F1_score(y_train_target_var.values, y_train_proba)
+    # auroc_train = logistic_model.get_auroc(y_train_target_var.values, y_train_proba)
 
-    print(f"Training F1 Score: {f1_train:.4f}")
-    print(f"Training AUROC: {auroc_train:.4f}")
-    plt.savefig('logistic_bce_loss.png', dpi=300, bbox_inches='tight')
+    # print(f"Training F1 Score: {f1_train:.4f}")
+    # print(f"Training AUROC: {auroc_train:.4f}")
+    # plt.savefig('logistic_bce_loss.png', dpi=300, bbox_inches='tight')
+
+
+    
 
     
 
