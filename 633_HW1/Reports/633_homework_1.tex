@@ -1,0 +1,561 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{pgfplotstable}
+\usepackage{adjustbox}
+\usepackage{float}
+
+
+
+\begin{document}
+
+% Header with left date and right name/UIN
+\noindent
+\begin{minipage}[t]{0.5\textwidth}
+    \raggedright
+    September 23, 2025
+\end{minipage}%
+\begin{minipage}[t]{0.5\textwidth}
+    \raggedleft
+    Joseph DeLeonardis\\
+    UIN: 0820000866
+\end{minipage}
+
+\vspace{0.5cm}
+
+% Centered title below
+\begin{center}
+    \textbf{\Large CSCE-633}\\
+    Machine Learning Homework \#1
+\end{center}
+
+\vspace{1cm}
+
+\textbf{Problem 1: Gradient Calculation (8 points)}
+
+In this question you are required to calculate gradients for 2 scalar functions.
+
+\textbf{(a)} Calculate the gradient of the function $f(x, y) = x^2 + \ln(y) + xy + y^3$. What is the gradient value for $(x, y) = (10, -10)$?
+
+The gradient is:
+$\nabla f = \left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right)$
+
+Taking partial derivatives:
+$\frac{\partial f}{\partial x} = 2x + y$
+
+$\frac{\partial f}{\partial y} = \frac{1}{y} + x + 3y^2$
+
+$$\nabla f = \left\langle 2x + y, \frac{1}{y} + x + 3y^2 \right\rangle$$
+
+
+At $(x, y) = (10, -10)$:
+$$\nabla f = \left\langle 2(10) + (-10), \frac{1}{-10} + 10 + 3(-10)^2 \right\rangle = \langle 10, 309.9 \rangle$$
+
+\textbf{(b)} Calculate the gradient of the function $f(x, y, z) = \tanh(x^3y^3) + \sin(z^2)$. What is the gradient value for $(x, y, z) = (-1, 0, \pi/2)$?
+
+% Your work for part (b) goes here
+
+The gradient is:
+$$\nabla f = \left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right)$$
+
+Taking partial derivatives:
+$$\frac{\partial f}{\partial x} = 3x^2y^3 sech^2(x^3y^3)$$
+
+$$\frac{\partial f}{\partial y} = 3x^3y^2 sech^2(x^3y^3)$$
+
+$$\frac{\partial f}{\partial z} = 2z \cos(z^2)$$
+
+
+
+
+
+$$\nabla f = \left\langle 3x^2y^3 sech^2(x^3y^3), 3x^3y^2 sech^2(x^3y^3), 2z \cos(z^2) \right\rangle$$
+
+At $(x, y, z) = (-1, 0, \pi/2)$:
+\newline
+Note: With y being 0, we can just say that the X and Y components of the gradient will go to 0
+\newline
+\textbf{Simplifying the Expression $2z \cos(z^2)$ at $z = \frac{\pi}{2}$}
+\newline
+We start with the original expression:
+\[
+2z \cos(z^2)
+\]
+
+\subsection*{Step 1: Substitute $z = \frac{\pi}{2}$}
+
+\[
+2 \cdot \frac{\pi}{2} \cdot \cos\left(\left(\frac{\pi}{2}\right)^2\right)
+\]
+
+\subsection*{Step 2: Simplify the Coefficient}
+
+\[
+\pi \cdot \cos\left(\left(\frac{\pi}{2}\right)^2\right)
+\]
+
+\subsection*{Step 3: Simplify the Exponent}
+
+\[
+\left(\frac{\pi}{2}\right)^2 = \frac{\pi^2}{4}
+\]
+
+So the expression becomes:
+
+\[
+\pi \cdot \cos\left(\frac{\pi^2}{4}\right)
+\]
+
+$$\nabla f = \langle  0,0, \pi \cos\left(\frac{\pi^2}{4}\right) \rangle$$
+
+\vspace{1cm}
+
+\textbf{Problem 2: Matrix Multiplication (8 points)}
+
+\vspace{1cm}
+
+\textbf{(a)} 
+
+\section*{Outer Product of Two Vectors}
+
+Let the vertical (column) vector be:
+\[
+\mathbf{u} = \begin{bmatrix}
+10 \\
+-5 \\
+2 \\
+8
+\end{bmatrix}
+\]
+
+And the horizontal (row) vector be:
+\[
+\mathbf{v} = \begin{bmatrix}
+0 & 3 & 0 & 1
+\end{bmatrix}
+\]
+
+The outer product \(\mathbf{u} \mathbf{v}\) is:
+\[
+\mathbf{u} \mathbf{v} =
+\begin{bmatrix}
+10 \\
+-5 \\
+2 \\
+8
+\end{bmatrix}
+\begin{bmatrix}
+0 & 3 & 0 & 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+10 \cdot 0 & 10 \cdot 3 & 10 \cdot 0 & 10 \cdot 1 \\
+-5 \cdot 0 & -5 \cdot 3 & -5 \cdot 0 & -5 \cdot 1 \\
+2 \cdot 0 & 2 \cdot 3 & 2 \cdot 0 & 2 \cdot 1 \\
+8 \cdot 0 & 8 \cdot 3 & 8 \cdot 0 & 8 \cdot 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 & 30 & 0 & 10 \\
+0 & -15 & 0 & -5 \\
+0 & 6 & 0 & 2 \\
+0 & 24 & 0 & 8
+\end{bmatrix}
+\]
+
+\vspace{1cm}
+
+\textbf{(b)}
+
+\section*{Matrix Multiplication}
+
+We are given the following two matrices:
+
+\[
+A = \begin{bmatrix}
+1 & -1 & 6 & 7 \\
+9 & 0 & 8 & 1 \\
+-8 & 1 & 2 & 3 \\
+-10 & 4 & 0 & 1
+\end{bmatrix}
+\quad \text{and} \quad
+B = \begin{bmatrix}
+6 & 2 & 0 \\
+0 & -1 & 1 \\
+-3 & 0 & 4 \\
+3 & 4 & 7
+\end{bmatrix}
+\]
+
+The multiplication of two matrices \( A \) and \( B \) is performed by taking the dot product of each row of matrix \( A \) with each column of matrix \( B \). We will calculate the resulting matrix \( C = A \times B \).
+
+\[
+C = A \times B
+\]
+
+\[
+C = \begin{bmatrix}
+(1 \cdot 6 + (-1) \cdot 0 + 6 \cdot (-3) + 7 \cdot 3) &
+(1 \cdot 2 + (-1) \cdot (-1) + 6 \cdot 0 + 7 \cdot 4) &
+(1 \cdot 0 + (-1) \cdot 1 + 6 \cdot 4 + 7 \cdot 7) \\
+(9 \cdot 6 + 0 \cdot 0 + 8 \cdot (-3) + 1 \cdot 3) &
+(9 \cdot 2 + 0 \cdot (-1) + 8 \cdot 0 + 1 \cdot 4) &
+(9 \cdot 0 + 0 \cdot 1 + 8 \cdot 4 + 1 \cdot 7) \\
+(-8 \cdot 6 + 1 \cdot 0 + 2 \cdot (-3) + 3 \cdot 3) &
+(-8 \cdot 2 + 1 \cdot (-1) + 2 \cdot 0 + 3 \cdot 4) &
+(-8 \cdot 0 + 1 \cdot 1 + 2 \cdot 4 + 3 \cdot 7) \\
+(-10 \cdot 6 + 4 \cdot 0 + 0 \cdot (-3) + 1 \cdot 3) &
+(-10 \cdot 2 + 4 \cdot (-1) + 0 \cdot 0 + 1 \cdot 4) &
+(-10 \cdot 0 + 4 \cdot 1 + 0 \cdot 4 + 1 \cdot 7)
+\end{bmatrix}
+\]
+
+Now, we will calculate each element in the resulting matrix.
+
+\[
+C = \begin{bmatrix}
+(6 + 0 - 18 + 21) & (2 + 1 + 0 + 28) & (0 - 1 + 24 + 49) \\
+(54 + 0 - 24 + 3) & (18 + 0 + 0 + 4) & (0 + 0 + 32 + 7) \\
+(-48 + 0 - 6 + 9) & (-16 - 1 + 0 + 12) & (0 + 1 + 8 + 21) \\
+(-60 + 0 + 0 + 3) & (-20 - 4 + 0 + 4) & (0 + 4 + 0 + 7)
+\end{bmatrix}
+\]
+
+Simplifying the entries:
+
+\[
+C = \begin{bmatrix}
+9 & 31 & 72 \\
+33 & 22 & 39 \\
+-45 & -5 & 30 \\
+-57 & -20 & 11
+\end{bmatrix}
+\]
+
+Thus, the result of multiplying \( A \times B \) is:
+
+\[
+C = \begin{bmatrix}
+9 & 31 & 72 \\
+33 & 22 & 39 \\
+-45 & -5 & 30 \\
+-57 & -20 & 11
+\end{bmatrix}
+\]
+
+\section*{\textbf{Programming Section}}
+
+\subsection*{Data Processing (4 points)}
+
+To ensure the datasets were properly loaded, I printed out the shapes of both the training and testing sets and obtained the following results:
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Dataset} & \textbf{Samples} & \textbf{Features} \\
+\hline
+Training & 6,250 & 12 (11 features + 1 target) \\
+Test     & 3,221 & 11 (features only) \\
+\hline
+\end{tabular}
+\end{center}
+
+The testing set has one less column in the shape because it does not contain the target variable which is typical for this type of problem.
+
+\textbf{Missing Values Analysis:}  
+The dataset contained \textbf{924} missing values, which were handled using the \texttt{dropna()} method to remove incomplete records in the clean the data. 
+
+\textbf{Feature Extraction:}  
+Successfully separated the feature matrix \textbf{X} (all columns except the last) from the target variable \textbf{y} (PT08.S1(CO) sensor readings). Having clean data sets to work with was essential for this task.
+
+
+
+\subsection*{Exploratory Data Analysis (10 points)}
+
+
+\textbf{1. Feature Distribution Analysis}
+\newline
+Generated histograms for all 11 features to examine their distributions and assess normality.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{histograms.png}
+    \caption{Distribution histograms for all 11 features in the dataset}
+    \label{fig:histograms}
+\end{figure}
+\vspace{3cm}
+\textbf{Distribution Assessment:}
+\begin{itemize}
+    \item \textbf{Normally Distributed Features:} PT08.S2(NMHC), PT08.S4(NO2), PT08.S5(O3), NO2(GT)
+    \item \textbf{Skewed Features:} NMHC(GT) (right-skewed), C6H6(GT) (right-skewed), NOx(GT) (right-skewed), PT08.S3(NOx) (right-skewed), T (left-skewed), RH (left-skewed)
+    \item \textbf{Multimodal Features:} AH (Absolute Humidity) shows a sharp, spike-like distribution with most values concentrated around a single point
+\end{itemize}
+
+
+
+
+\textbf{Outlier Analysis:}
+\begin{itemize}
+    \item \textbf{Features with Extreme Values:} NMHC(GT), C6H6(GT), NOx(GT), T (Temperature)
+    \item \textbf{Outlier Impact:} Extreme values can skew the mean and standard deviation which can affect fitting the model and create undesirable results. This is because those features will dominate the algorithm and make the other 
+    features insignificant when processing the data. As result in most cases such as the specific problem analyzed this requires the features to be normalized between 0 and 1. 
+\end{itemize}
+
+
+
+\textbf{2. Feature Correlation Analysis}
+
+
+
+Selected features for correlation analysis: \textbf{Absolute Humidity (AH) } and \textbf{Relative Humidity (RH) }.
+\newline
+AH and RH were selected in order to test for collinearity because it is expected that they will be highly correlated. 
+
+\textbf{Scatter Plot Results:}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{scatter.png}
+    \caption{Scatter plot illustrating correlation between selected features}
+    \label{fig:scatter}
+\end{figure} 
+\vspace{5cm}
+\begin{itemize}
+    \item \textbf{Pearson Correlation Coefficient:} \textbf{Correlation between AH and RH: 0.9433.}
+    \item \textbf{Correlation Strength:} \textbf{Strong} \textbf{Positive}
+    \item \textbf{Linear Relationship:} \textbf{Yes there is a linear relationship the line in the corner of the plot is a strong indicator of that.}
+    \item \textbf{Data Point Distribution:} \textbf{There is at least one data point that is an outlier that could be removed with further analysis which is -200,-200.}
+\end{itemize}
+
+
+\vspace{1cm}
+\textbf{3. Pearson Correlation Matrix Analysis}
+
+Computed 12×12 correlation matrix C for all variables (11 features + 1 target variable PT08.S1(CO)).
+
+\begin{table}[htbp]
+\centering
+\adjustbox{max width=\textwidth}{%
+\begin{tabular}{lcccccccccccc}
+\toprule
+ & NMHC(GT) & C6H6(GT) & PT08.S2(NMHC) & NOx(GT) & PT08.S3(NOx) & NO2(GT) & PT08.S4(NO2) & PT08.S5(O3) & T & RH & AH & PT08.S1(CO) \\
+\midrule
+NMHC(GT)      & 1.0000 & 0.0335 & 0.1101 & -0.0056 & 0.0427 & 0.1001 & 0.1603 & 0.1017 & -0.0061 & 0.0054 & 0.0075 & 0.1691 \\
+C6H6(GT)      & 0.0335 & 1.0000 & 0.7676 & -0.0049 & 0.5075 & -0.0160 & 0.7766 & 0.6411 & 0.9707 & 0.9242 & 0.9842 & 0.8510 \\
+PT08.S2(NMHC) & 0.1101 & 0.7676 & 1.0000 & 0.3367 & -0.0793 & 0.1835 & 0.8752 & 0.9102 & 0.6664 & 0.5853 & 0.6454 & 0.9325 \\
+NOx(GT)       & -0.0056 & -0.0049 & 0.3367 & 1.0000 & -0.4496 & 0.8167 & 0.0385 & 0.4684 & -0.1458 & -0.0590 & -0.1030 & 0.2826 \\
+PT08.S3(NOx)  & 0.0427 & 0.5075 & -0.0793 & -0.4496 & 1.0000 & -0.2701 & 0.1184 & -0.2165 & 0.5866 & 0.5678 & 0.6188 & 0.0773 \\
+NO2(GT)       & 0.1001 & -0.0160 & 0.1835 & 0.8167 & -0.2701 & 1.0000 & -0.0172 & 0.2621 & -0.0923 & -0.0907 & -0.0694 & 0.1584 \\
+PT08.S4(NO2)  & 0.1603 & 0.7766 & 0.8752 & 0.0385 & 0.1184 & -0.0172 & 1.0000 & 0.7248 & 0.7547 & 0.6415 & 0.6932 & 0.8448 \\
+PT08.S5(O3)   & 0.1017 & 0.6411 & 0.9102 & 0.4684 & -0.2165 & 0.2621 & 0.7248 & 1.0000 & 0.5011 & 0.5238 & 0.5178 & 0.8938 \\
+T             & -0.0061 & 0.9707 & 0.6664 & -0.1458 & 0.5866 & -0.0923 & 0.7547 & 0.5011 & 1.0000 & 0.8842 & 0.9809 & 0.7504 \\
+RH            & 0.0054 & 0.9242 & 0.5853 & -0.0590 & 0.5678 & -0.0907 & 0.6415 & 0.5238 & 0.8842 & 1.0000 & 0.9433 & 0.7441 \\
+AH            & 0.0075 & 0.9842 & 0.6454 & -0.1030 & 0.6188 & -0.0694 & 0.6932 & 0.5178 & 0.9809 & 0.9433 & 1.0000 & 0.7620 \\
+PT08.S1(CO)   & 0.1691 & 0.8510 & 0.9325 & 0.2826 & 0.0773 & 0.1584 & 0.8448 & 0.8938 & 0.7504 & 0.7441 & 0.7620 & 1.0000 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Correlation matrix of sensor and environmental data.}
+\label{tab:correlation}
+\end{table}
+
+
+
+
+\textbf{Correlation Matrix Findings:}
+\begin{itemize}
+    \item \textbf{Strongest Positive Correlation:} \textbf{PT08.S2(NMHC) and PT08.S1(CO), correlation = 0.9325}
+    \item \textbf{Strongest Negative Correlation:} \textbf{NOx(GT) and PT08.S3(NOx): -0.4496, NOx(GT) and PT08.S3(NOx), correlation = -0.4496}
+    \item \textbf{Target Variable Correlations:} \textbf{PT08.S2(NMHC) = 0.9325, PT08.S5(O3) = 0.8938, C6H6(GT) = 0.8510}
+\end{itemize}
+
+\textbf{Variable Associations:}
+\begin{itemize}
+    \item \textbf{High Multicollinearity:} \textbf{
+PT08.S2(NMHC) \& PT08.S1(CO) = 0.9325, 
+PT08.S2(NMHC) \& PT08.S5(O3) = 0.9102, 
+C6H6(GT) \& AH = 0.9842, 
+C6H6(GT) \& T = 0.9707, 
+PT08.S1(CO) \& PT08.S5(O3) = 0.8938, 
+PT08.S4(NO2) \& PT08.S2(NMHC) = 0.8752.
+}
+
+
+
+    \item \textbf{Independent Features:} \textbf{NMHC(GT) = 0.17, 
+NO2(GT) = 0.16, 
+PT08.S3(NOx) = 0.12
+}
+    \item \textbf{Feature Clusters:} \textbf{Group 1: PT08.S2(NMHC), PT08.S1(CO), PT08.S5(O3), PT08.S4(NO2) Group 2: T, RH, AH Group 3: NOx(GT), NO2(GT), PT08.S3(NOx)}
+\end{itemize}
+
+\textbf{Implications for Modeling:}
+\textbf{Features with high collinearity can create redundancy this makes it tough to pin point effects of individual features and can skew model results.}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{correlation.png}
+    \caption{Pearson correlation matrix heatmap for all 12 variables}
+    \label{fig:correlation_heatmap}
+\end{figure}
+
+
+
+
+\subsection*{Linear Regression (20 points)}
+
+The MSE drops rapidly from approximately 1.2×10$^6$ to near zero within the first few hundred iterations, indicating that the model quickly finds the optimal solution. 
+
+\textbf{Training Loss Plot:}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{loss.png}
+    \caption{Training loss curve showing MSE convergence over iterations}
+    \label{fig:loss}
+\end{figure}
+\vspace{5cm}
+\textbf{Model Implementation:}
+
+
+Two approaches for linear regression were implemented:
+
+\textbf{1. Closed-Form Solution:}  
+Used the normal equation:
+\[
+\mathbf{w} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}
+\]
+
+Results:
+\begin{itemize}
+    \item RMSE: \textbf{71.0793}
+\end{itemize}
+
+
+\textbf{2. Gradient Descent:}  
+Implemented iterative optimization with the following hyperparameters:
+\begin{itemize}
+    \item Learning rate: \textbf{0.1}
+    \item Max iterations: \textbf{100000}
+    \item Feature normalization: \textbf{Applied}
+\end{itemize}
+
+Results:
+\begin{itemize}
+    \item Final MSE: \textbf{ 5052.27}
+    \item Final RMSE: \textbf{71.0793560590635}
+    \item  RMSE (Recorded from Grade Scope) : \textbf{70.4709167670161}
+\end{itemize}
+
+
+\textbf{Performance:}
+A separate .fit() function for a closed-form solution was written and included in this report so the results of the two approached could be compared. It was found that they were the same values when gradient descent hyperparameters were optimized. 
+
+\subsection*{(4) Logistic Regression Implementation (20 points)}
+
+\textbf{1. Binary Label Creation:}
+Using the column PT08.S1(CO), binary labels were created where values greater than 1000 correspond to label 1 and values less than or equal to 1000 correspond to label 0.
+\vspace{1cm}
+Results:
+\begin{itemize}
+\item Label 0 (less than or equal to 1000): 3090 samples 50.1\%)
+\item Label 1 (greater than 1000): 3083 samples 49.9\%)
+\end{itemize}
+\vspace{1cm}
+\textbf{2. Loss Function (Criterion):}
+The model uses Binary Cross Entropy (BCE) loss as the criterion function. The Final BCE Loss was recorded at 0.2203.
+
+\textbf{3. Training Loop and Loss Plot:}
+Gradient descent optimization was used because in the lectures we learned that in logistic regression we can not use a closed-form solution. 
+
+Training Parameters:
+\begin{itemize}
+\item Learning Rate: [0.08]
+\item Maximum Iterations: [3000]
+\item L2 Regularization: [0.001]
+\item Final BCE Loss: [0.2203]
+\end{itemize}
+
+\textbf{4. Model Predictions:}
+The trained model makes predictions using the sigmoid activation function to output probabilities, which are then converted to binary classifications using a 0.5 threshold.
+
+\textbf{5. Hyperparameter Tuning Results:}
+Hyperparameters were tuned to achieve the target performance metrics on the validation set. Initially the model was failing and it was found that I accidentally used binary values instead of probability which led to a AUROC of around 0.49. This is an important lesson learned it is easy to mix those values up. 
+\vspace{1cm}
+Final Performance:
+\begin{itemize}
+\item F1 Score 0.9013819095477387
+\item AUROC  0.9678882793363803
+\end{itemize}
+Both metrics exceed the required thresholds, demonstrating successful model performance.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{logistic_loss.png}
+\caption{Binary Cross Entropy Loss during Logistic Regression Training}
+\label{fig:logistic_loss}
+\end{figure}
+\vspace{5cm}
+
+
+\subsection*{(5) Result Analysis - Cross Validation (20 points)}
+\textbf{Linear Regression K-fold results}
+K-fold values:
+\begin{itemize}
+\item RMSE Value: 71.07935605906191, 71.7614455560681, 70.40735343709633, 71.35758700816251, 71.18207286148925, 70.60562912579253
+\item Average RMSE:  71.18556069703826
+\item Standard deviation RMSE: 1.9769521833921653
+\end{itemize}
+
+\textbf{Logistic Regression K-fold results}
+\begin{itemize}
+\item AUROC scores per fold: 0.9742881508761638, 0.9739920518813723, 0.9685913185913188, 0.9713204840780371, 0.9651559073999556
+\item F1 scores per fold: 0.9166666666666667, 0.0, 0.908485856905158, 0.9095435684647303, 0.9105824446267433
+\item 0.971 ± 0.003
+\item Average AUROC: 0.971 ± 0.003
+\item Average F1 Score(without the edge case): 0.911 ± 0.003    Average F1 Score (with the edge case): 0.729 ± 0.365 
+\end{itemize}
+There was an edge case in there to determine if TP is 0. If we divided by 0 that would return undefined and break the program. Instead lets just say the entire thing equals 0. It not ideal to get a K fold with no TPs but it is theoretically possible. It is important to denote the average F1 score with and with it. 
+\newline
+\textbf{Model Coefficients}
+When a model is fully trained the weights provide strong insight on what features are the most important in determining the target variable. Features with larger absolute coefficient values have greater influence on the models prediction and the opposite is true for smaller values. 
+
+
+\subsection*{(6) Logistic Regression (10 points)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roc_curve_kfold1.png}
+    \caption{ROC Curve – K-Fold 1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roc_curve_kfold2.png}
+    \caption{ROC Curve – K-Fold 2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roc_curve_kfold3.png}
+    \caption{ROC Curve – K-Fold 3}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roc_curve_kfold4.png}
+    \caption{ROC Curve – K-Fold 4}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{roc_curve_kfold5.png}
+    \caption{ROC Curve – K-Fold 5}
+\end{figure}
+\vspace{2cm}
+All 5 of the k-folds look the exact same, this was expected. There's minor deviations in the dataset but not enough to visually tell when we graph an entire fold. The standard deviation is extremely small. These were the results I expected. 
+
+\subsection*{Use of AI and External Resources}
+I did not use any generative AI tools to help generate code for this assignment. All code was written entirely by me. Claude.ai was used only to generate a LaTeX template to format this report.
+
+
+\end{document}
